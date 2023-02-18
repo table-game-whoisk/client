@@ -4,7 +4,13 @@
     {
       "path": "pages/index/index",
       "style": {
-        "navigationBarTitleText": "uni-app"
+        "navigationBarTitleText": "home"
+      }
+    },
+    {
+      "path": "pages/ready/index",
+      "style": {
+        "navigationBarTitleText": "ready"
       }
     }
   ],

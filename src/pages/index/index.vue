@@ -1,16 +1,41 @@
 <template>
   <view class="content">
-    <image class="logo" src="/static/logo.png" />
-    <view class="text-area">
-      <text class="title">{{ title }}</text>
-      <uni-badge text="1"></uni-badge>
-    </view>
+    <button class="btn orange" @click="handleCreateRoom">创建房间</button>
+    <button class="btn green" @click="inputDialogToggle">加入房间</button>
   </view>
+  <uni-popup ref="inputDialog" type="dialog">
+    <uni-popup-dialog
+      ref="inputClose"
+      mode="input"
+      title="加入房间"
+      placeholder="请输入房间号"
+      @confirm="handleJoinRoom"
+    />
+  </uni-popup>
 </template>
 
 <script setup lang="ts">
 import { ref } from "vue";
-const title = ref("Hello");
+
+const inputDialog = ref<any>(null);
+
+const jumpToReadyPage = () => {
+  uni.navigateTo({
+    url: "/pages/ready/index"
+  });
+};
+
+const handleCreateRoom = () => {
+  jumpToReadyPage();
+};
+
+const inputDialogToggle = () => {
+  inputDialog.value?.open();
+};
+
+const handleJoinRoom = (value: string | number) => {
+  console.log(value);
+};
 </script>
 
 <style lang="scss" scoped>
@@ -19,27 +44,17 @@ const title = ref("Hello");
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  .color {
-    color: red;
+  height: 100vh;
+  .btn {
+    width: 40%;
+    margin-bottom: 20px;
+    color: #fff;
   }
-}
-
-.logo {
-  height: 200rpx;
-  width: 200rpx;
-  margin-top: 200rpx;
-  margin-left: auto;
-  margin-right: auto;
-  margin-bottom: 50rpx;
-}
-
-.text-area {
-  display: flex;
-  justify-content: center;
-}
-
-.title {
-  font-size: 36rpx;
-  color: #8f8f94;
+  .orange {
+    background-color: #fc7300;
+  }
+  .green {
+    background-color: #1f8a70;
+  }
 }
 </style>
