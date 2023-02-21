@@ -14,8 +14,4 @@ namespace Store {
 		nickname: string;
 		create: (name: string) => Promise<void>;
 	};
-	type WS = {
-		socket: UniApp.SocketTask | null;
-		// connect: ({ roomId, userId }: { roomId: string; userId: string }) =>void
-	}
 }

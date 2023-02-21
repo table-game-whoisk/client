@@ -1,7 +1,7 @@
 <template>
   <view class="content">
     <view class="topBox">
-      <text>{{ user.nickname }}</text>
+      {{ user.nickname }}
     </view>
     <view class="bottomBox">
       <button class="btn orange" @click="handleCreateRoom">创建房间</button>
@@ -27,16 +27,15 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref } from "vue";
+import { onMounted, ref, watch } from "vue";
 import { userStore } from "@/store/user";
-import { useWebsocket } from "./useWebsocket";
 import { createId } from "@/utils/createId";
+import { useConnect } from "./useSocket";
 
 const inputDialog = ref<any>(null);
 const createDialog = ref<any>(null);
 const user = userStore();
-
-const { connect, disconnect } = useWebsocket();
+const { connect } = useConnect();
 
 const ShowCreateDialog = () => {
   if (!user.id) {
@@ -47,6 +46,13 @@ const ShowCreateDialog = () => {
 
 onMounted(() => {
   ShowCreateDialog();
+  user.id && connect(user.id);
+});
+
+watch(user, () => {
+  () => {
+    user.id && connect(user.id);
+  };
 });
 
 const handleCreateUser = (value: string) => {
@@ -62,7 +68,15 @@ const jumpToReadyPage = () => {
 const handleCreateRoom = () => {
   if (ShowCreateDialog()) return;
   const roomId = createId();
-  connect({ roomId, userId: user.id });
+  uni.sendSocketMessage({
+    data: JSON.stringify({ type: "enter", content: { roomId } }),
+    success() {
+      console.log("send success");
+    },
+    fail() {
+      console.log("send fail");
+    }
+  });
   jumpToReadyPage();
 };
 
@@ -71,9 +85,7 @@ const inputDialogToggle = () => {
   inputDialog.value?.open();
 };
 
-const handleJoinRoom = (value: string) => {
-  connect({ roomId: value, userId: user.id });
-};
+const handleJoinRoom = (value: string) => {};
 </script>
 
 <style lang="scss" scoped>
@@ -82,14 +94,8 @@ const handleJoinRoom = (value: string) => {
   display: flex;
   flex-direction: column;
   .topBox {
-    height: 10vh;
-    display: flex;
-    align-items: center;
-    padding-left: 20px;
-    box-shadow: 0 2px 5px 1px #999;
-    .icon {
-      margin-left: 20px;
-    }
+    text-align: center;
+    padding: 20px 0;
   }
   .bottomBox {
     flex: 1;

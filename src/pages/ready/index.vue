@@ -1,7 +1,7 @@
 <template>
   <view class="content">
     <view class="topBox">
-      <view v-for="player in players" class="avatarWrap"  :key="player">
+      <view v-for="player in players" class="avatarWrap" :key="player">
         <view :class="player % 2 ? 'active avatar' : 'avatar'">
           <view>{{ player }}</view>
         </view>
@@ -14,7 +14,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, computed } from "vue";
+import { ref, computed, onMounted } from "vue";
 
 const players = ref(4);
 
@@ -38,14 +38,14 @@ const players = ref(4);
         border-radius: 50%;
         height: 100%;
         height: flex;
-        background-color: #BFDB38;
+        background-color: #bfdb38;
         display: flex;
         align-items: center;
         justify-content: center;
         color: #fff;
       }
       .active {
-        background-color: #FC7300;
+        background-color: #fc7300;
       }
     }
   }
@@ -58,7 +58,7 @@ const players = ref(4);
       width: 40%;
       margin-bottom: 20px;
       color: #fff;
-      background-color: #1F8A70;
+      background-color: #1f8a70;
     }
   }
 }
