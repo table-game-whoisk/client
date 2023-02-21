@@ -6,8 +6,9 @@
     "paths": {
       "@/*": ["./src/*"]
     },
+    "moduleResolution": "node",
     "lib": ["esnext", "dom"],
-    "types": ["@dcloudio/types"]
+    "types": ["@dcloudio/types","node"]
   },
   "include": ["src/**/*.ts", "src/**/*.d.ts", "src/**/*.tsx", "src/**/*.vue"]
 }
