@@ -1,5 +1,14 @@
 <template>
-  <view class="content">
+  <view class="content" v-if="info?.room.roomId">
+    <view class="topBox"> 房间号： {{ info.room.roomId }} </view>
+    <view class="topBox"> 当前已准备： {{ readyCount }} </view>
+    <view class="bottomBox">
+      <button :class="isReady ? 'btn gray' : 'btn orange'" @click="ready" :disabled="isReady">
+        {{ isReady ? "已准备" : "准备" }}
+      </button>
+    </view>
+  </view>
+  <view class="content" v-else>
     <view class="topBox">
       {{ user.nickname }}
     </view>
@@ -8,6 +17,7 @@
       <button class="btn green" @click="inputDialogToggle">加入房间</button>
     </view>
   </view>
+
   <uni-popup ref="inputDialog" type="dialog"
     ><uni-popup-dialog
       ref="inputClose"
@@ -27,16 +37,28 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, ref, watch } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
 import { userStore } from "@/store/user";
 import { createId } from "@/utils/createId";
-import { useConnect } from "./useSocket";
+import { useScoket } from "@/utils/useSocket";
 
 const inputDialog = ref<any>(null);
 const createDialog = ref<any>(null);
 const user = userStore();
-const { connect } = useConnect();
 
+const { info, connect, enterRoom, ready } = useScoket();
+
+const getUserInfo = async () => {
+  await user.info();
+  ShowCreateDialog();
+};
+
+onMounted(() => {
+  getUserInfo();
+  user.id && connect(user.id);
+});
+
+/// 创建房间创建用户
 const ShowCreateDialog = () => {
   if (!user.id) {
     createDialog.value?.open();
@@ -44,48 +66,32 @@ const ShowCreateDialog = () => {
   }
 };
 
-onMounted(() => {
-  ShowCreateDialog();
-  user.id && connect(user.id);
-});
-
-watch(user, () => {
-  () => {
-    user.id && connect(user.id);
-  };
-});
-
-const handleCreateUser = (value: string) => {
-  user.create(value);
-};
-
-const jumpToReadyPage = () => {
-  uni.navigateTo({
-    url: "/pages/ready/index"
-  });
+const handleCreateUser = async (value: string) => {
+  const { id } = await user.create(value);
+  id && connect(id);
 };
 
 const handleCreateRoom = () => {
   if (ShowCreateDialog()) return;
-  const roomId = createId();
-  uni.sendSocketMessage({
-    data: JSON.stringify({ type: "enter", content: { roomId } }),
-    success() {
-      console.log("send success");
-    },
-    fail() {
-      console.log("send fail");
-    }
-  });
-  jumpToReadyPage();
+  enterRoom(createId());
 };
+
+const handleJoinRoom = (value: string) => {};
 
 const inputDialogToggle = () => {
   if (ShowCreateDialog()) return;
   inputDialog.value?.open();
 };
 
-const handleJoinRoom = (value: string) => {};
+/// 准备
+const readyCount = computed(
+  () =>
+    `${info.value?.room.members.filter(({ status }) => status === "ready").length || 0}/${
+      info.value?.room.members.length || 0
+    }`
+);
+
+const isReady = computed(() => info.value?.player.status === "ready");
 </script>
 
 <style lang="scss" scoped>
@@ -110,6 +116,10 @@ const handleJoinRoom = (value: string) => {};
     }
     .orange {
       background-color: #fc7300;
+    }
+    .gray {
+      background-color: #fc7300;
+      opacity: 0.5;
     }
     .green {
       background-color: #1f8a70;
