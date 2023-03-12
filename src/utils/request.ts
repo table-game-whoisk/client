@@ -1,6 +1,7 @@
 export const request = (() => {
   const platform = process.env.UNI_PLATFORM as string;
-  const baseURL = import.meta.env.VITE_API_BASEURL as string;
+  console.log(platform);
+  const baseURL = platform === "h5" ? "/api" : (import.meta.env.VITE_API_BASEURL as string);
 
   const getFullUrl = (path: string) => {
     if (baseURL.endsWith("/")) {

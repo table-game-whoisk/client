@@ -15,4 +15,8 @@ namespace Store {
     create: (name: string) => Promise<UserProp>;
     info: () => Promise<UserProp>;
   };
+
+  type Player = {
+    id: string;
+  };
 }

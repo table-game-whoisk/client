@@ -1,7 +1,8 @@
 declare interface UserProp {
   id: string;
-  nickname: string;
   ip: string;
+  nickname: string;
+  avatarUrl: string;
 }
 
 declare interface MessageData {
@@ -24,7 +25,13 @@ declare interface PlayerInfo {
     room: any;
     roomId: string;
     owner: string;
+    status: string;
     members: Player[];
   };
   player: Player;
+}
+
+declare interface Message {
+  id: string;
+  message: string;
 }

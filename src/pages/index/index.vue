@@ -10,11 +10,16 @@
   </view>
   <view class="content" v-else>
     <view class="topBox">
-      {{ user.nickname }}
+      <view class="avatar">
+        <image v-if="user.avatarUrl" :src="user.avatarUrl" class="img"></image>
+      </view>
+      <view class="nickname">
+        {{ user.nickname }}
+      </view>
     </view>
     <view class="bottomBox">
       <button class="btn orange" @click="handleCreateRoom">创建房间</button>
-      <button class="btn green" @click="inputDialogToggle">加入房间</button>
+      <button class="btn green" @click="() => inputDialog.open()">加入房间</button>
     </view>
   </view>
 
@@ -26,64 +31,46 @@
       placeholder="请输入房间号"
       @confirm="handleJoinRoom"
   /></uni-popup>
-  <uni-popup ref="createDialog" type="dialog"
-    ><uni-popup-dialog
-      mode="input"
-      ref="inputClose"
-      title="创建用户"
-      placeholder="请输入昵称"
-      @confirm="handleCreateUser"
-  /></uni-popup>
 </template>
 
 <script setup lang="ts">
 import { computed, onMounted, ref, watch } from "vue";
-import { userStore } from "@/store/user";
 import { createId } from "@/utils/createId";
 import { useScoket } from "@/utils/useSocket";
+import { useUserStore } from "@/store/user";
 
 const inputDialog = ref<any>(null);
-const createDialog = ref<any>(null);
-const user = userStore();
+const { user, getUserInfo, createUser } = useUserStore();
 
-const { info, connect, enterRoom, ready } = useScoket();
+const { info, connect, enterRoom, ready, getInfo } = useScoket();
 
-const getUserInfo = async () => {
-  await user.info();
-  ShowCreateDialog();
+//  查找用户或创建用户 && 链接用户，
+const handleConnect = async () => {
+  try {
+    const value = await getUserInfo();
+    if (!value) return;
+    if (!value.id) {
+      const { id } = await createUser(value?.nickname || "");
+      connect(id);
+    } else {
+      connect(value.id);
+    }
+  } catch (e) {}
 };
 
 onMounted(() => {
-  getUserInfo();
-  user.id && connect(user.id);
+  handleConnect();
 });
 
-/// 创建房间创建用户
-const ShowCreateDialog = () => {
-  if (!user.id) {
-    createDialog.value?.open();
-    return true;
-  }
-};
-
-const handleCreateUser = async (value: string) => {
-  const { id } = await user.create(value);
-  id && connect(id);
-};
-
 const handleCreateRoom = () => {
-  if (ShowCreateDialog()) return;
   enterRoom(createId());
 };
 
-const handleJoinRoom = (value: string) => {};
-
-const inputDialogToggle = () => {
-  if (ShowCreateDialog()) return;
-  inputDialog.value?.open();
+const handleJoinRoom = (roomId: string) => {
+  enterRoom(roomId);
 };
 
-/// 准备
+
 const readyCount = computed(
   () =>
     `${info.value?.room.members.filter(({ status }) => status === "ready").length || 0}/${
@@ -92,6 +79,14 @@ const readyCount = computed(
 );
 
 const isReady = computed(() => info.value?.player.status === "ready");
+
+watch(info, () => {
+  if (info.value?.room.status === "playing") {
+    uni.redirectTo({
+      url: "/pages/room/index"
+    });
+  }
+});
 </script>
 
 <style lang="scss" scoped>
@@ -100,8 +95,23 @@ const isReady = computed(() => info.value?.player.status === "ready");
   display: flex;
   flex-direction: column;
   .topBox {
-    text-align: center;
     padding: 20px 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    .avatar {
+      border-radius: 50%;
+      overflow: hidden;
+      height: 100px;
+      width: 100px;
+      .img {
+        height: 100px;
+        width: 100px;
+      }
+    }
+    .nickname {
+      color: #666;
+    }
   }
   .bottomBox {
     flex: 1;

@@ -12,6 +12,12 @@
       "style": {
         "navigationBarTitleText": "ready"
       }
+    },
+    {
+      "path": "pages/room/index",
+      "style": {
+        "navigationBarTitleText": "room"
+      }
     }
   ],
   "globalStyle": {
