@@ -5,30 +5,36 @@ declare interface UserProp {
   avatarUrl: string;
 }
 
+interface Info {
+  player: PlayerInfo | null;
+  room: RoomInfo | null;
+}
+
+declare interface PlayerInfo {
+  id: string;
+  status: string;
+  avatarUrl: string | null;
+  nickname: string | null;
+}
+
+declare interface RoomInfo {
+  roomId: string | null;
+  status: string | null;
+  owner: string | null;
+  members: PlayerInfo[];
+}
+
+declare type messageType = "info" | "create" | "enter" | "exit" | "ready" | "start" | "message" | "error";
+
 declare interface MessageData {
-  type: "info" | "message" | "enter" | "start" | "character" | "exit" | "error";
-  from?: userId;
+  type: messageType;
+  player?: PlayerInfo;
+  room?: RoomInfo | null;
   timestamp?: number;
   to?: userId | userId[];
   msg?: string;
   roomId?: roomId;
   content?: any;
-}
-
-declare interface Player {
-  status: string;
-  id: string;
-}
-
-declare interface PlayerInfo {
-  room: {
-    room: any;
-    roomId: string;
-    owner: string;
-    status: string;
-    members: Player[];
-  };
-  player: Player;
 }
 
 declare interface Message {

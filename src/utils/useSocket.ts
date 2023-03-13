@@ -3,7 +3,7 @@ import { ref, watch } from "vue";
 export const useScoket = () => {
   const socket = ref<UniApp.SocketTask | null>(null);
   const messages = ref<MessageData[]>([]);
-  const info = ref<PlayerInfo | null>(null);
+  const info = ref<Info | null>(null);
   const timer = ref<NodeJS.Timer | null>(null);
   const id = ref<string | null>(null);
 
@@ -13,16 +13,18 @@ export const useScoket = () => {
         data: "ping",
         success() {},
         fail() {
-          id.value && connect(id.value);
+          const { avatarUrl, nickname } = info.value?.player || {};
+          if (!avatarUrl || !nickname) return;
+          id.value && connect(id.value, avatarUrl, nickname);
         }
       });
     }, 3000);
   };
 
-  const connect = (userId: string) => {
+  const connect = (userId: string, avatarUrl: string, nickname: string) => {
     id.value = userId;
     socket.value = uni.connectSocket({
-      url: `${import.meta.env.VITE_SOCKET_PORT}?userId=${userId}`,
+      url: `${import.meta.env.VITE_SOCKET_PORT}?userId=${userId}&avatarUrl=${avatarUrl}&nickname=${nickname}`,
       success() {
         console.log("connect success");
         heartBeat();
@@ -53,10 +55,10 @@ export const useScoket = () => {
   };
 
   const dispatchMessage = (message: MessageData) => {
-    const { type, content, msg } = message;
+    const { type, player, room, msg } = message;
     switch (type) {
       case "info":
-        info.value = content;
+        info.value = { player: player || null, room: room || null };
         break;
       case "error":
         uni.showToast({
@@ -83,11 +85,19 @@ export const useScoket = () => {
     send({ type: "info" });
   };
 
+  const createRoom = (roomId: string) => {
+    send({ type: "create", roomId });
+  };
+
   const enterRoom = (roomId: string) => {
     send({ type: "enter", roomId });
   };
 
   const ready = () => {
+    send({ type: "ready" });
+  };
+
+  const start = () => {
     send({ type: "start" });
   };
 
@@ -97,6 +107,8 @@ export const useScoket = () => {
     connect,
     disConnect,
     enterRoom,
-    ready
+    createRoom,
+    ready,
+    start
   };
 };
