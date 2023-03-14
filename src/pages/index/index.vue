@@ -71,10 +71,10 @@ const handleConnect = async () => {
     if (!value) return;
     if (!value.id) {
       const { id, avatarUrl, nickname } = await createUser(value?.nickname || "");
-      connect(id, avatarUrl, nickname);
+      connect({ userId: id, avatarUrl, nickname });
     } else {
       const { id, avatarUrl, nickname } = value;
-      connect(id, avatarUrl, nickname);
+      connect({ userId: id, avatarUrl, nickname });
     }
   } catch (e) {}
 };

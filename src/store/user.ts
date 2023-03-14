@@ -16,6 +16,7 @@ export const useUserStore = defineStore("user", () => {
   const getUserInfo = async () => {
     try {
       const info = await uni.getUserInfo({ provider: "weixin" });
+      console.log(info)
       const {
         userInfo: { nickName, avatarUrl }
       } = info as unknown as UniApp.GetUserInfoRes;

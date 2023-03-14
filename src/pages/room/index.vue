@@ -11,8 +11,9 @@
         <view class="nick">{{ player.nickname }}</view>
       </view>
     </view>
+    <view class="playerPannel"> </view>
     <view class="bottomField">
-      <Chat :messages="messages" />
+      <Chat @send="sendMessage" />
     </view>
   </view>
 </template>
@@ -20,14 +21,13 @@
 <script lang="ts" setup>
 import { useScoket } from "@/utils/useSocket";
 import Chat from "@/components/Chat/index.vue";
-import { onMounted, ref } from "vue";
+import { onMounted, ref, watch } from "vue";
 
-const messages = ref<Message[]>([]);
-
-const { info, getInfo } = useScoket();
+const { info, getInfo, sendMessage, getMessge } = useScoket();
 
 onMounted(() => {
   getInfo();
+  getMessge();
 });
 </script>
 
@@ -82,6 +82,11 @@ onMounted(() => {
         white-space: nowrap;
       }
     }
+  }
+  .playerPannel {
+    min-height: 10vh;
+    box-shadow: 1px 1px 3px 3px #ddd;
+    border-radius: 5px;
   }
   .bottomField {
     flex: 1;

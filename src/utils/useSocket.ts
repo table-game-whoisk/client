@@ -1,11 +1,12 @@
+import { useGameStore } from "@/store/game";
 import { ref, watch } from "vue";
 
 export const useScoket = () => {
   const socket = ref<UniApp.SocketTask | null>(null);
-  const messages = ref<MessageData[]>([]);
   const info = ref<Info | null>(null);
   const timer = ref<NodeJS.Timer | null>(null);
-  const id = ref<string | null>(null);
+  const user = ref<{ userId: string; avatarUrl: string; nickname: string } | null>(null);
+  const game = useGameStore();
 
   const heartBeat = () => {
     timer.value = setInterval(() => {
@@ -13,16 +14,15 @@ export const useScoket = () => {
         data: "ping",
         success() {},
         fail() {
-          const { avatarUrl, nickname } = info.value?.player || {};
-          if (!avatarUrl || !nickname) return;
-          id.value && connect(id.value, avatarUrl, nickname);
+          user.value && connect(user.value);
         }
       });
     }, 3000);
   };
 
-  const connect = (userId: string, avatarUrl: string, nickname: string) => {
-    id.value = userId;
+  const connect = (data: { userId: string; avatarUrl: string; nickname: string }) => {
+    const { userId, avatarUrl, nickname } = data;
+    user.value = data;
     socket.value = uni.connectSocket({
       url: `${import.meta.env.VITE_SOCKET_PORT}?userId=${userId}&avatarUrl=${avatarUrl}&nickname=${nickname}`,
       success() {
@@ -55,16 +55,20 @@ export const useScoket = () => {
   };
 
   const dispatchMessage = (message: MessageData) => {
-    const { type, player, room, msg } = message;
+    const { type, player, room, msg, messages } = message;
     switch (type) {
       case "info":
         info.value = { player: player || null, room: room || null };
+        break;
+      case "message":
+        game.setMessageList(messages || []);
         break;
       case "error":
         uni.showToast({
           title: msg,
           icon: "error"
         });
+        break;
     }
     return;
   };
@@ -101,6 +105,14 @@ export const useScoket = () => {
     send({ type: "start" });
   };
 
+  const sendMessage = (text: string) => {
+    send({ type: "message", content: text });
+  };
+
+  const getMessge = () => {
+    send({ type: "getMessage" });
+  };
+
   return {
     info,
     getInfo,
@@ -108,7 +120,9 @@ export const useScoket = () => {
     disConnect,
     enterRoom,
     createRoom,
+    getMessge,
     ready,
-    start
+    start,
+    sendMessage
   };
 };

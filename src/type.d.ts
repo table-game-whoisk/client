@@ -24,7 +24,16 @@ declare interface RoomInfo {
   members: PlayerInfo[];
 }
 
-declare type messageType = "info" | "create" | "enter" | "exit" | "ready" | "start" | "message" | "error";
+declare type messageType =
+  | "info"
+  | "create"
+  | "enter"
+  | "exit"
+  | "ready"
+  | "start"
+  | "message"
+  | "getMessage"
+  | "error";
 
 declare interface MessageData {
   type: messageType;
@@ -35,9 +44,12 @@ declare interface MessageData {
   msg?: string;
   roomId?: roomId;
   content?: any;
+  messages?: Message[];
 }
 
 declare interface Message {
-  id: string;
+  timestamp: number;
+  messageFrom: PlayerInfo;
+  to?: userId | userId[] | undefined;
   message: string;
 }
