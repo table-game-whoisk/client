@@ -33,6 +33,7 @@ declare type messageType =
   | "start"
   | "message"
   | "getMessage"
+  | "character"
   | "error";
 
 declare interface MessageData {
@@ -52,4 +53,8 @@ declare interface Message {
   messageFrom: PlayerInfo;
   to?: userId | userId[] | undefined;
   message: string;
+}
+
+namespace Game {
+  declare type GameStep = "start" | "character" | "end";
 }

@@ -55,13 +55,16 @@ export const useScoket = () => {
   };
 
   const dispatchMessage = (message: MessageData) => {
-    const { type, player, room, msg, messages } = message;
+    const { type, player, room, msg, messages, content } = message;
     switch (type) {
       case "info":
         info.value = { player: player || null, room: room || null };
         break;
       case "message":
         game.setMessageList(messages || []);
+        break;
+      case "character":
+        game.setCharacter(content);
         break;
       case "error":
         uni.showToast({

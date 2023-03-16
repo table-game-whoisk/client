@@ -58,10 +58,11 @@ watch(messageList, () => {
     box-sizing: border-box;
     padding: 10px 0;
     .inner {
-      max-height: 55vh;
+      max-height: 45vh;
       box-sizing: border-box;
       overflow-y: scroll;
       display: flex;
+      align-items: flex-start;
       flex-direction: column;
       width: 100%;
       .message {
@@ -72,6 +73,7 @@ watch(messageList, () => {
         padding: 5px 10px;
         display: flex;
         flex-direction: column;
+
         background-color: $theme-color-2;
         box-sizing: border-box;
         .time {
