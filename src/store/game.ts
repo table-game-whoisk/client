@@ -3,24 +3,31 @@ import { ref } from "vue";
 
 export const useGameStore = defineStore("game", () => {
   const messageList = ref<Message[]>([]);
-  const character = ref<any[]>([]);
-  const gameStep = ref<Game.GameStep>("start");
+  const characterList = ref<Game.CharacterProp[]>([]);
+  const playerInfo = ref<PlayerInfo | null>(null);
+  const gameStep = ref<Game.gameStep>("start");
 
   const setMessageList = (data: Message[]) => {
     messageList.value = data;
+  };
+
+  const setPlayerInfo = (data: PlayerInfo) => {
+    playerInfo.value = data;
   };
 
   const setCharacter = (data: any[]) => {
     if (gameStep.value === "start") {
       gameStep.value = "character";
     }
-    character.value = data;
+    characterList.value = data;
   };
 
   return {
+    playerInfo,
     messageList,
-    character,
+    characterList,
     gameStep,
+    setPlayerInfo,
     setMessageList,
     setCharacter
   };

@@ -59,6 +59,7 @@ export const useScoket = () => {
     switch (type) {
       case "info":
         info.value = { player: player || null, room: room || null };
+        player && game.setPlayerInfo(player);
         break;
       case "message":
         game.setMessageList(messages || []);

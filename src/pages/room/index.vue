@@ -16,20 +16,20 @@
         <view class="nick">{{ player.nickname }}</view>
       </view>
     </view>
-    <view class="playerPannel" @click="() => showPooup()">
+    <view class="playerPannel" @click="() => playerInfo && showPooup(playerInfo)">
       <view class="topInfo">
         <view class="left">
           <view class="nickname">{{ info?.player?.nickname }}dwedwedaefaf</view>
-          <view>（慈悲的神父）</view>
+          <view>({{ playerInfo?.character?.name }})</view>
         </view>
         <view class="right">
-          <view>❤:4</view>
-          <view>🔪:1</view>
-          <view>🛡:1</view>
-          <view>✨:1</view>
+          <view>❤:{{ playerInfo?.character?.health }}</view>
+          <view>🔪:{{ playerInfo?.character?.attack }}</view>
+          <view>🛡:{{ playerInfo?.character?.defense }}</view>
+          <view>✨:{{ playerInfo?.character?.dodge }}</view>
         </view>
       </view>
-      <view class="bottomInfo"> [skillname] 哈利路亚！！！ </view>
+      <view class="bottomInfo"> [skillname] {{ playerInfo?.character?.Skill?.name }} </view>
     </view>
     <view class="bottomField">
       <Chat @send="sendMessage" />
@@ -37,8 +37,8 @@
   </view>
   <uni-popup ref="popup" background-color="#fff" type="bottom">
     <view class="popContent">
-      <!-- <CardList /> -->
-      <PlayerPanel />
+      <!-- <CardList cha /> -->
+      <PlayerPanel :playerInfo="player" />
     </view>
   </uni-popup>
 </template>
@@ -55,7 +55,8 @@ import { storeToRefs } from "pinia";
 const { info, getInfo, sendMessage, getMessge } = useScoket();
 const popup = ref<any>(null);
 const game = useGameStore();
-const { gameStep } = storeToRefs(game);
+const { gameStep, playerInfo } = storeToRefs(game);
+const player = ref<PlayerInfo | null>(null);
 
 onMounted(() => {
   getInfo();
@@ -68,7 +69,8 @@ watch(gameStep, () => {
   }
 });
 
-const showPooup = (player?: PlayerInfo) => {
+const showPooup = (data: PlayerInfo) => {
+  player.value = data;
   popup.value?.open();
 };
 </script>

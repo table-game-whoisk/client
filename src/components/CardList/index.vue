@@ -6,7 +6,15 @@
     </view>
     <view class="cardWrap">
       <uni-transition mode-class="fade" :show="show">
-        <view class="card"></view>
+        <view class="card">
+          <view> {{ playerInfo?.character?.name }}</view>
+          <view>【生命值】{{ playerInfo?.character?.health }}</view>
+          <view>【攻击力】{{ playerInfo?.character?.attack }}</view>
+          <view>【防御值】{{ playerInfo?.character?.defense }}</view>
+          <view>【闪避值】 {{ playerInfo?.character?.dodge }}</view>
+          <view>【技能】{{ playerInfo?.character?.Skill?.name }}</view>
+          <view> {{ playerInfo?.character?.Skill?.describe }}</view>
+        </view>
       </uni-transition>
     </view>
     <view class="btn rbtn" @click="() => onCut()">
@@ -19,8 +27,13 @@
 </template>
 
 <script lang="ts" setup>
+import { useGameStore } from "@/store/game";
 import { onReady } from "@dcloudio/uni-app";
 import { ref } from "vue";
+import { storeToRefs } from "pinia";
+
+const game = useGameStore();
+const { characterList, playerInfo } = storeToRefs(game);
 
 const show = ref<boolean>(true);
 
@@ -33,7 +46,7 @@ const onCut = (isLeft?: boolean) => {
 </script>
 
 <style lang="scss" scoped>
-.tick{
+.tick {
   text-align: center;
 }
 .content {
@@ -58,6 +71,7 @@ const onCut = (isLeft?: boolean) => {
       box-sizing: border-box;
       background-color: rgba($color: $theme-color-1, $alpha: 0.5);
       border-radius: 10px;
+      padding: 10px;
     }
   }
   .rbtn {
