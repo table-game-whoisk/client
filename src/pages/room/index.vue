@@ -37,8 +37,8 @@
   </view>
   <uni-popup ref="popup" background-color="#fff" type="bottom">
     <view class="popContent">
-      <!-- <CardList cha /> -->
-      <PlayerPanel :playerInfo="player" />
+      <CharacterList v-if="gameStep === 'character'" @select="selectCharacter" />
+      <PlayerPanel v-else :playerInfo="player" />
     </view>
   </uni-popup>
 </template>
@@ -47,12 +47,12 @@
 import { useScoket } from "@/utils/useSocket";
 import Chat from "@/components/Chat/index.vue";
 import { onMounted, ref, watch } from "vue";
-import CardList from "@/components/CardList/index.vue";
+import CharacterList from "@/components/CharacterList/CharacterList.vue";
 import PlayerPanel from "@/components/PlayerPanel/PlayerPanel.vue";
 import { useGameStore } from "@/store/game";
 import { storeToRefs } from "pinia";
 
-const { info, getInfo, sendMessage, getMessge } = useScoket();
+const { info, getInfo, sendMessage, getMessge, selectCharacter } = useScoket();
 const popup = ref<any>(null);
 const game = useGameStore();
 const { gameStep, playerInfo } = storeToRefs(game);
@@ -66,6 +66,7 @@ onMounted(() => {
 watch(gameStep, () => {
   if (gameStep.value === "character") {
     popup.value?.open();
+  } else if (gameStep.value === "round") {
   }
 });
 

@@ -14,6 +14,8 @@ export const useScoket = () => {
         data: "ping",
         success() {},
         fail() {
+          timer.value && clearInterval(timer.value);
+          timer.value = null;
           user.value && connect(user.value);
         }
       });
@@ -60,12 +62,17 @@ export const useScoket = () => {
       case "info":
         info.value = { player: player || null, room: room || null };
         player && game.setPlayerInfo(player);
+        room?.gameStep && game.setGameStep(room.gameStep);
         break;
       case "message":
         game.setMessageList(messages || []);
         break;
       case "character":
-        game.setCharacter(content);
+        game.setCharacter(content.characterList);
+        break;
+      case "round":
+        game.setGameStep("round");
+        content && game.setCurrRoundPlayer(content);
         break;
       case "error":
         uni.showToast({
@@ -117,6 +124,10 @@ export const useScoket = () => {
     send({ type: "getMessage" });
   };
 
+  const selectCharacter = (data: Game.CharacterProp) => {
+    send({ type: "character", content: { character: data } });
+  };
+
   return {
     info,
     getInfo,
@@ -127,6 +138,7 @@ export const useScoket = () => {
     getMessge,
     ready,
     start,
-    sendMessage
+    sendMessage,
+    selectCharacter
   };
 };

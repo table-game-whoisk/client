@@ -30,7 +30,10 @@
       </view>
     </view>
     <view class="bottom">
-      <button class="btn orange" @click="() => (showCard = true)">使用卡牌</button>
+      <button :class="showCard ? 'btn' : 'btn green'" @click="() => (showCard = !showCard)">
+        {{ showCard ? "查看玩家" : "使用卡牌" }}
+      </button>
+      <button v-if="showCard" class="btn green" @click="handleUseCard">使用</button>
     </view>
   </template>
 </template>
@@ -54,7 +57,7 @@ const onCut = (isLeft?: boolean) => {
     cardIndex.value = isLeft ? cardIndex.value - 1 : cardIndex.value + 1;
     cardIndex.value %= player.value.cardList.length;
     if (cardIndex.value < 0) {
-      cardIndex.value = player.value.cardList.length-1;
+      cardIndex.value = player.value.cardList.length - 1;
     }
   }
 
@@ -62,6 +65,8 @@ const onCut = (isLeft?: boolean) => {
     show.value = true;
   }, 500);
 };
+
+const handleUseCard = () => {};
 </script>
 
 <style lang="scss" scoped>
@@ -111,6 +116,7 @@ const onCut = (isLeft?: boolean) => {
       background-color: rgba($color: $theme-color-1, $alpha: 0.5);
       border-radius: 10px;
       padding: 10px;
+      position: relative;
     }
   }
   .rbtn {
@@ -124,7 +130,11 @@ const onCut = (isLeft?: boolean) => {
   justify-content: center;
   .btn {
     color: #fff;
+    width: 100px;
     background-color: $theme-color-1;
+  }
+  .green {
+    background-color: $theme-color-2;
   }
   .disable {
   }

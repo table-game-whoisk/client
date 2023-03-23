@@ -23,7 +23,8 @@ declare interface RoomInfo {
   roomId: string | null;
   status: string | null;
   owner: string | null;
-  members: PlayerInfo[];
+  gameStep: Game.gameStep | null;
+  members: PlayerInfo[] | null;
 }
 
 declare type messageType =
