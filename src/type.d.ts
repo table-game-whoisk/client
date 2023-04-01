@@ -1,8 +1,5 @@
 declare interface UserProp {
   id: string;
-  ip: string;
-  nickname: string;
-  avatarUrl: string;
 }
 
 interface Info {
@@ -20,7 +17,7 @@ declare interface PlayerInfo {
 }
 
 declare interface RoomInfo {
-  roomId: string | null;
+  id: string | null;
   status: string | null;
   owner: string | null;
   gameStep: Game.gameStep | null;

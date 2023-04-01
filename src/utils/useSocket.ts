@@ -5,7 +5,7 @@ export const useScoket = () => {
   const socket = ref<UniApp.SocketTask | null>(null);
   const info = ref<Info | null>(null);
   const timer = ref<NodeJS.Timer | null>(null);
-  const user = ref<{ userId: string; avatarUrl: string; nickname: string } | null>(null);
+  const user = ref<{ id: string } | null>(null);
   const game = useGameStore();
 
   const heartBeat = () => {
@@ -22,11 +22,11 @@ export const useScoket = () => {
     }, 3000);
   };
 
-  const connect = (data: { userId: string; avatarUrl: string; nickname: string }) => {
-    const { userId, avatarUrl, nickname } = data;
+  const connect = (data: { id: string }) => {
+    const { id } = data;
     user.value = data;
     socket.value = uni.connectSocket({
-      url: `${import.meta.env.VITE_SOCKET_PORT}?userId=${userId}&avatarUrl=${avatarUrl}&nickname=${nickname}`,
+      url: `${import.meta.env.VITE_SOCKET_PORT}?userId=${id}`,
       success() {
         console.log("connect success");
         heartBeat();
@@ -128,6 +128,10 @@ export const useScoket = () => {
     send({ type: "character", content: { character: data } });
   };
 
+  const useCard = (data: { card: Game.CardProp; to: string }) => {
+    send({ type: "card", content: data });
+  };
+
   return {
     info,
     getInfo,
@@ -139,6 +143,7 @@ export const useScoket = () => {
     ready,
     start,
     sendMessage,
-    selectCharacter
+    selectCharacter,
+    useCard
   };
 };

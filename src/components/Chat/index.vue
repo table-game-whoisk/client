@@ -1,8 +1,18 @@
 <template>
   <view class="content">
     <view class="messageField">
-      <scroll-view scroll-y="true" :scroll-into-view="bottomId" class="inner" enable-flex="true" scroll-with-animation="true">
-        <view v-for="(item, index) in messageList" :key="item.timestamp" class="message">
+      <scroll-view
+        scroll-y="true"
+        :scroll-into-view="bottomId"
+        class="inner"
+        enable-flex="true"
+        scroll-with-animation="true"
+      >
+        <view
+          v-for="(item, index) in messageList"
+          :key="item.timestamp"
+          :class="item.messageFrom.id === '0' ? 'message orange' : 'message green'"
+        >
           <view class="time">
             <view class="name">[{{ item.messageFrom.nickname }}]</view>
             <view>{{ new Date(item.timestamp).toLocaleTimeString() }}</view></view
@@ -73,8 +83,6 @@ watch(messageList, () => {
         padding: 5px 10px;
         display: flex;
         flex-direction: column;
-
-        background-color: $theme-color-2;
         box-sizing: border-box;
         .time {
           display: flex;
@@ -91,6 +99,12 @@ watch(messageList, () => {
           max-width: 100%;
           word-wrap: break-word;
         }
+      }
+      .green {
+        background-color: $theme-color-2;
+      }
+      .orange {
+        background-color: $theme-color-4;
       }
     }
   }

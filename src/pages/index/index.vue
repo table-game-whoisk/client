@@ -1,6 +1,6 @@
 <template>
-  <view class="content" v-if="info?.room?.roomId">
-    <view class="topBox"> 房间号： {{ info.room.roomId }} </view>
+  <view class="content" v-if="info?.room?.id">
+    <view class="topBox"> 房间号： {{ info.room.id }} </view>
     <view class="topBox"> 当前已准备： {{ readyCount }} </view>
     <view class="membersBlock">
       <view v-for="(player, index) in info?.room.members" :key="player.id" class="member">
@@ -19,14 +19,14 @@
     </view>
   </view>
   <view class="content" v-else>
-    <view class="topBox">
+    <!-- <view class="topBox">
       <view class="avatar">
-        <image v-if="user.avatarUrl" :src="user.avatarUrl" class="img"></image>
+        <image v-if="info?.player?.avatarUrl" :src="info?.player?.avatarUrl" class="img"></image>
       </view>
       <view class="nickname">
-        {{ user.nickname }}
+        {{ info?.player?.nickname }}
       </view>
-    </view>
+    </view> -->
     <view class="bottomBox">
       <button class="btn orange" @click="handleCreateRoom">创建房间</button>
       <button class="btn green" @click="() => inputDialog.open()">加入房间</button>
@@ -49,11 +49,14 @@ import { createId } from "@/utils/createId";
 import { useScoket } from "@/utils/useSocket";
 import { useUserStore } from "@/store/user";
 
-
 const inputDialog = ref<any>(null);
-const { user, getUserInfo, createUser } = useUserStore();
+const { user, createUser } = useUserStore();
 
 const { info, connect, createRoom, enterRoom, ready, start, getInfo } = useScoket();
+
+onMounted(() => {
+  handleConnect();
+});
 
 watch(info, () => {
   if (info.value?.room?.status === "playing") {
@@ -66,22 +69,14 @@ watch(info, () => {
 //  查找用户或创建用户 && 链接用户，
 const handleConnect = async () => {
   try {
-    const value = await getUserInfo();
-
-    if (!value) return;
-    if (!value.id) {
-      const { id, avatarUrl, nickname } = await createUser(value?.nickname || "");
-      connect({ userId: id, avatarUrl, nickname });
+    if (!user?.id) {
+      const { id } = await createUser();
+      connect({ id });
     } else {
-      const { id, avatarUrl, nickname } = value;
-      connect({ userId: id, avatarUrl, nickname });
+      connect({ id: user.id });
     }
   } catch (e) {}
 };
-
-onMounted(() => {
-  handleConnect();
-});
 
 const handleCreateRoom = () => {
   createRoom(createId());
@@ -93,8 +88,8 @@ const handleJoinRoom = (roomId: string) => {
 
 const readyCount = computed(
   () =>
-    `${info.value?.room?.members.filter(({ status }) => status === "ready").length || 0}/${
-      info.value?.room?.members.length || 0
+    `${info.value?.room?.members?.filter(({ status }) => status === "ready").length || 0}/${
+      info.value?.room?.members?.length || 0
     }`
 );
 

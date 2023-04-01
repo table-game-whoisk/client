@@ -19,7 +19,7 @@
       <view class="cardWrap">
         <uni-transition mode-class="fade" :show="show">
           <view class="card">
-            <view>{{ cardIndex + 1 }} / {{ player?.cardList?.length || 0 }}</view>
+            <view>{{ cardIndex + 1 }} / {{ self?.cardList?.length || 0 }}</view>
             <view>{{ card?.name }}</view>
             <view>{{ card?.describe }}</view>
           </view>
@@ -39,25 +39,26 @@
 </template>
 <script lang="ts" setup>
 import { useGameStore } from "@/store/game";
-import { computed, ref } from "vue";
+import { computed, ref, watch } from "vue";
 import { storeToRefs } from "pinia";
 
-const { playerInfo } = defineProps<{ playerInfo: PlayerInfo | null }>();
+const props = defineProps<{ playerInfo: PlayerInfo | null }>();
 const game = useGameStore();
-const { playerInfo: player } = storeToRefs(game);
+const { playerInfo: self } = storeToRefs(game);
 const showCard = ref<boolean>(false);
 const show = ref<boolean>(true);
 const cardIndex = ref<number>(0);
+const emit = defineEmits(["card"]);
 
-const card = computed(() => player.value?.cardList[cardIndex.value] || null);
+const card = computed(() => self.value?.cardList[cardIndex.value] || null);
 
 const onCut = (isLeft?: boolean) => {
   show.value = false;
-  if (player.value?.cardList) {
+  if (self.value?.cardList) {
     cardIndex.value = isLeft ? cardIndex.value - 1 : cardIndex.value + 1;
-    cardIndex.value %= player.value.cardList.length;
+    cardIndex.value %= self.value.cardList.length;
     if (cardIndex.value < 0) {
-      cardIndex.value = player.value.cardList.length - 1;
+      cardIndex.value = self.value.cardList.length - 1;
     }
   }
 
@@ -66,7 +67,11 @@ const onCut = (isLeft?: boolean) => {
   }, 500);
 };
 
-const handleUseCard = () => {};
+const handleUseCard = () => {
+  const { playerInfo } = props;
+  if (!card.value || !playerInfo?.id) return;
+  emit("card", { card: card.value, to: playerInfo.id });
+};
 </script>
 
 <style lang="scss" scoped>
