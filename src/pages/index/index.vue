@@ -19,20 +19,34 @@
     </view>
   </view>
   <view class="content" v-else>
-    <!-- <view class="topBox">
-      <view class="avatar">
-        <image v-if="info?.player?.avatarUrl" :src="info?.player?.avatarUrl" class="img"></image>
+    <view class="topBox">
+      <view v-if="user.avatar" class="avatar">
+        <image :src="user.avatar" class="img"></image>
       </view>
-      <view class="nickname">
-        {{ info?.player?.nickname }}
+      <view v-if="user.nickname" class="nickname">
+        {{ user.nickname }}
       </view>
-    </view> -->
+    </view>
     <view class="bottomBox">
       <button class="btn orange" @click="handleCreateRoom">创建房间</button>
-      <button class="btn green" @click="() => inputDialog.open()">加入房间</button>
+      <button class="btn green" @click="openJoinRoom">加入房间</button>
     </view>
   </view>
-
+  <uni-popup ref="popup" background-color="#fff" type="top">
+    <view class="popup-content">
+      <button open-type="chooseAvatar" @chooseavatar="(e:any)=>avatar = e.detail.avatarUrl" class="avatar-wrap">
+        <image class="avatar" :src="avatar"></image>
+      </button>
+      <input
+        type="nickname"
+        placeholder="请输入昵称"
+        :value="nickname"
+        @change="(e:any)=>nickname = e.detail.value"
+        class="input"
+      />
+      <button @click="handleCreateUser" class="btn">确定</button>
+    </view>
+  </uni-popup>
   <uni-popup ref="inputDialog" type="dialog"
     ><uni-popup-dialog
       ref="inputClose"
@@ -44,13 +58,20 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, ref, watch } from "vue";
+import { computed, onMounted, ref, watch, type Ref } from "vue";
 import { createId } from "@/utils/createId";
 import { useScoket } from "@/utils/useSocket";
 import { useUserStore } from "@/store/user";
+import { storeToRefs, type Store, type _UnwrapAll } from "pinia";
 
 const inputDialog = ref<any>(null);
-const { user, createUser } = useUserStore();
+const popup = ref<any>(null);
+const userStore = useUserStore();
+const { user } = storeToRefs(userStore);
+const nickname = ref<string>("");
+const avatar = ref<string>(
+  "https://mmbiz.qpic.cn/mmbiz/icTdbqWNOwNRna42FI242Lcia07jQodd2FJGIYQfG0LAJGFxM4FbnQP6yfMxBgJ0F3YRqJCJ1aPAK2dQagdusBZg/0"
+);
 
 const { info, connect, createRoom, enterRoom, ready, start, getInfo } = useScoket();
 
@@ -69,20 +90,48 @@ watch(info, () => {
 //  查找用户或创建用户 && 链接用户，
 const handleConnect = async () => {
   try {
-    if (!user?.id) {
-      const { id } = await createUser();
-      connect({ id });
+    if (!user.value.id) {
+      // const { id } = await createUser();
+      popup.value && popup.value.open();
     } else {
-      connect({ id: user.id });
+      connect({ id: user.value.id });
     }
   } catch (e) {}
 };
 
+const handleCreateUser = async () => {
+  if (!nickname.value) {
+    return;
+  }
+  const data = {
+    nickname: nickname.value,
+    avatar: avatar.value
+  };
+  userStore.createUser(data);
+  popup.value && popup.value.close();
+};
+
 const handleCreateRoom = () => {
+  if (!user.value.id) {
+    popup.value && popup.value.open();
+    return;
+  }
   createRoom(createId());
 };
 
+const openJoinRoom = ()=>{
+  if (!user.value.id) {
+    popup.value && popup.value.open();
+    return;
+  }
+  inputDialog && inputDialog.value.open()
+}
+
 const handleJoinRoom = (roomId: string) => {
+  if (!user.value.id) {
+    popup.value && popup.value.open();
+    return;
+  }
   enterRoom(roomId);
 };
 
@@ -182,6 +231,34 @@ const isReady = computed(() => info.value?.player?.status === "ready");
     .green {
       background-color: #1f8a70;
     }
+  }
+}
+.popup-content {
+  padding: 30px 0 60px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  .avatar-wrap {
+    display: flex;
+    align-items: center;
+    padding: 0;
+    background-color: transparent;
+    border: none;
+    outline: none;
+    .avatar {
+      height: 60px;
+      width: 60px;
+    }
+  }
+  .input {
+    height: 32px;
+    text-align: center;
+    margin: 30px;
+  }
+  .btn {
+    width: 40%;
+    color: #fff;
+    background-color: #fc7300;
   }
 }
 </style>
