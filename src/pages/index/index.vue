@@ -1,10 +1,10 @@
 <template>
-  <view class="content" v-if="info?.room?.id">
-    <view class="topBox"> 房间号： {{ info.room.id }} </view>
+  <view class="content" v-if="playerInfo?.room">
+    <view class="topBox"> 房间号： {{ playerInfo.room.id }} </view>
     <view class="topBox"> 当前已准备： {{ readyCount }} </view>
     <view class="membersBlock">
-      <view v-for="(player, index) in info?.room.members" :key="player.id" class="member">
-        <image :src="player.avatarUrl" class="img">
+      <view v-for="(player, index) in playerInfo?.room.members" :key="player.id" class="member">
+        <image :src="player.avatar" class="img">
           <view class="cover" v-if="player.status !== 'ready'">
             <uni-icons type="more-filled" size="30" color="#999"></uni-icons> </view
         ></image>
@@ -15,7 +15,7 @@
       <button :class="isReady ? 'btn gray' : 'btn orange'" @click="ready" :disabled="isReady">
         {{ isReady ? "已准备" : "准备" }}
       </button>
-      <button v-if="info.player?.id === info.room.owner" class="btn green" @click="start">开始</button>
+      <button v-if="playerInfo.player?.id === playerInfo.room.owner" class="btn green" @click="start">开始</button>
     </view>
   </view>
   <view class="content" v-else>
@@ -28,7 +28,7 @@
       </view>
     </view>
     <view class="bottomBox">
-      <button class="btn orange" @click="handleCreateRoom">创建房间</button>
+      <button class="btn orange" @click="() => createDialog.open()">创建房间</button>
       <button class="btn green" @click="openJoinRoom">加入房间</button>
     </view>
   </view>
@@ -46,6 +46,11 @@
       />
       <button @click="handleCreateUser" class="btn">确定</button>
     </view>
+  </uni-popup>
+  <uni-popup ref="createDialog" type="dialog">
+    <uni-popup-dialog type="info" title="设置房间人数" @confirm="handleCreateRoom">
+      <uni-number-box :min="4" :max="10" :step="1" v-model="memberNumber" />
+    </uni-popup-dialog>
   </uni-popup>
   <uni-popup ref="inputDialog" type="dialog"
     ><uni-popup-dialog
@@ -65,6 +70,7 @@ import { useUserStore } from "@/store/user";
 import { storeToRefs, type Store, type _UnwrapAll } from "pinia";
 
 const inputDialog = ref<any>(null);
+const createDialog = ref<any>(null);
 const popup = ref<any>(null);
 const userStore = useUserStore();
 const { user } = storeToRefs(userStore);
@@ -72,15 +78,17 @@ const nickname = ref<string>("");
 const avatar = ref<string>(
   "https://mmbiz.qpic.cn/mmbiz/icTdbqWNOwNRna42FI242Lcia07jQodd2FJGIYQfG0LAJGFxM4FbnQP6yfMxBgJ0F3YRqJCJ1aPAK2dQagdusBZg/0"
 );
+const memberNumber = ref<number>(4);
 
-const { info, connect, createRoom, enterRoom, ready, start, getInfo } = useScoket();
+const { playerInfo, connect, createRoom, enterRoom, ready, start } = useScoket();
 
 onMounted(() => {
   handleConnect();
 });
 
-watch(info, () => {
-  if (info.value?.room?.status === "playing") {
+watch(playerInfo, () => {
+  console.log(playerInfo.value?.room)
+  if (playerInfo.value?.room?.status === "playing") {
     uni.redirectTo({
       url: "/pages/room/index"
     });
@@ -91,10 +99,9 @@ watch(info, () => {
 const handleConnect = async () => {
   try {
     if (!user.value.id) {
-      // const { id } = await createUser();
       popup.value && popup.value.open();
     } else {
-      connect({ id: user.value.id });
+      connect({ ...user.value });
     }
   } catch (e) {}
 };
@@ -116,16 +123,16 @@ const handleCreateRoom = () => {
     popup.value && popup.value.open();
     return;
   }
-  createRoom(createId());
+  createRoom(createId(), memberNumber.value);
 };
 
-const openJoinRoom = ()=>{
+const openJoinRoom = () => {
   if (!user.value.id) {
     popup.value && popup.value.open();
     return;
   }
-  inputDialog && inputDialog.value.open()
-}
+  inputDialog && inputDialog.value.open();
+};
 
 const handleJoinRoom = (roomId: string) => {
   if (!user.value.id) {
@@ -137,12 +144,12 @@ const handleJoinRoom = (roomId: string) => {
 
 const readyCount = computed(
   () =>
-    `${info.value?.room?.members?.filter(({ status }) => status === "ready").length || 0}/${
-      info.value?.room?.members?.length || 0
+    `${playerInfo.value?.room?.members?.filter(({ status }) => status === "ready").length || 0}/${
+      playerInfo.value?.room?.members?.length || 0
     }`
 );
 
-const isReady = computed(() => info.value?.player?.status === "ready");
+const isReady = computed(() => playerInfo.value?.player?.status === "ready");
 </script>
 
 <style lang="scss" scoped>

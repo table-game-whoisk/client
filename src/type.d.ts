@@ -1,65 +1,7 @@
 declare interface UserProp {
   id: string;
-  nickname:string;
-  avatar:string;
-}
-
-interface Info {
-  player: PlayerInfo | null;
-  room: RoomInfo | null;
-}
-
-declare interface PlayerInfo {
-  id: string;
-  status: string;
-  avatarUrl: string | null;
-  character: Game.CharacterProp | null;
-  cardList: Game.CardProp[];
-  nickname: string | null;
-}
-
-declare interface RoomInfo {
-  id: string | null;
-  status: string | null;
-  owner: string | null;
-  gameStep: Game.gameStep | null;
-  members: PlayerInfo[] | null;
-}
-
-declare type messageType =
-  | "info"
-  | "create"
-  | "enter"
-  | "exit"
-  | "ready"
-  | "start"
-  | "character"
-  | "round"
-  | "vote"
-  | "card"
-  | "drop"
-  | "skill"
-  | "message"
-  | "getMessage"
-  | "error";
-
-declare interface MessageData {
-  type: messageType;
-  player?: PlayerInfo;
-  room?: RoomInfo | null;
-  timestamp?: number;
-  to?: userId | userId[];
-  msg?: string;
-  roomId?: roomId;
-  content?: any;
-  messages?: Message[];
-}
-
-declare interface Message {
-  timestamp: number;
-  messageFrom: PlayerInfo;
-  to?: userId | userId[] | undefined;
-  message: string;
+  nickname: string;
+  avatar: string;
 }
 
 namespace Game {

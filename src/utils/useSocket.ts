@@ -3,9 +3,9 @@ import { ref, watch } from "vue";
 
 export const useScoket = () => {
   const socket = ref<UniApp.SocketTask | null>(null);
-  const info = ref<Info | null>(null);
+  const playerInfo = ref<Info | null>(null);
   const timer = ref<NodeJS.Timer | null>(null);
-  const user = ref<{ id: string } | null>(null);
+  const user = ref<UserProp | null>(null);
   const game = useGameStore();
 
   const heartBeat = () => {
@@ -22,11 +22,11 @@ export const useScoket = () => {
     }, 3000);
   };
 
-  const connect = (data: { id: string }) => {
-    const { id } = data;
+  const connect = (data: UserProp) => {
+    const { id, nickname, avatar } = data;
     user.value = data;
     socket.value = uni.connectSocket({
-      url: `${import.meta.env.VITE_SOCKET_PORT}?userId=${id}`,
+      url: `${import.meta.env.VITE_SOCKET_PORT}?id=${id}&nickname=${nickname}&avatar=${avatar}`,
       success() {
         console.log("connect success");
         heartBeat();
@@ -44,7 +44,7 @@ export const useScoket = () => {
     uni.closeSocket({ success() {}, fail() {} });
   };
 
-  const send = (data: MessageData) => {
+  const send = <T extends messageType>(data: SendData<T>) => {
     uni.sendSocketMessage({
       data: JSON.stringify(data),
       success() {
@@ -56,27 +56,25 @@ export const useScoket = () => {
     });
   };
 
-  const dispatchMessage = (message: MessageData) => {
-    const { type, player, room, msg, messages, content } = message;
-    switch (type) {
+  const dispatchMessage = <T extends messageType>(data: MessageData<T>) => {
+    switch (data.type) {
       case "info":
-        info.value = { player: player || null, room: room || null };
-        player && game.setPlayerInfo(player);
-        room?.gameStep && game.setGameStep(room.gameStep);
+        setInfo(data as MessageData<"info">);
         break;
-      case "message":
-        game.setMessageList(messages || []);
-        break;
-      case "character":
-        game.setCharacter(content.characterList);
-        break;
-      case "round":
-        game.setGameStep("round");
-        content && game.setCurrRoundPlayer(content);
-        break;
+      // case "message":
+      //   game.setMessageList(messages || []);
+      //   break;
+      // case "character":
+      //   game.setCharacter(content.characterList);
+      //   break;
+      // case "round":
+      //   game.setGameStep("round");
+      //   content && game.setCurrRoundPlayer(content);
+      //   break;
       case "error":
+        const { content } = data as MessageData<"error">;
         uni.showToast({
-          title: msg,
+          title: content,
           icon: "error"
         });
         break;
@@ -86,7 +84,7 @@ export const useScoket = () => {
 
   uni.onSocketMessage(function (res) {
     if (res.data === "pong") return;
-    const data = JSON.parse(res.data) as MessageData;
+    const data = JSON.parse(res.data) as MessageData<messageType>;
     dispatchMessage(data);
   });
 
@@ -96,44 +94,50 @@ export const useScoket = () => {
     timer.value = null;
   });
 
+  const setInfo = (data: MessageData<"info">) => {
+    const { content } = data;
+    playerInfo.value = content;
+  };
+
   const getInfo = () => {
     send({ type: "info" });
   };
 
-  const createRoom = (roomId: string) => {
-    send({ type: "create", roomId });
+  const createRoom = (id: string, number: number) => {
+    send<"createRoom">({ type: "createRoom", content: { id, number } });
   };
 
-  const enterRoom = (roomId: string) => {
-    send({ type: "enter", roomId });
+  const enterRoom = (id: string) => {
+    send<"joinRoom">({ type: "joinRoom", content: { id } });
   };
 
   const ready = () => {
-    send({ type: "ready" });
+    send<"ready">({ type: "ready" });
   };
 
   const start = () => {
-    send({ type: "start" });
+    if (!playerInfo.value?.room?.id) return;
+    send<"start">({ type: "start", content: { id: playerInfo.value.room.id } });
   };
 
   const sendMessage = (text: string) => {
-    send({ type: "message", content: text });
+    // send({ type: "message", content: text });
   };
 
   const getMessge = () => {
-    send({ type: "getMessage" });
+    // send({ type: "getMessage" });
   };
 
   const selectCharacter = (data: Game.CharacterProp) => {
-    send({ type: "character", content: { character: data } });
+    // send({ type: "character", content: { character: data } });
   };
 
   const useCard = (data: { card: Game.CardProp; to: string }) => {
-    send({ type: "card", content: data });
+    // send({ type: "card", content: data });
   };
 
   return {
-    info,
+    playerInfo,
     getInfo,
     connect,
     disConnect,
