@@ -1,4 +1,6 @@
 import { useGameStore } from "@/store/game";
+import { useIMStore } from "@/store/im";
+import { storeToRefs } from "pinia";
 import { ref, watch } from "vue";
 
 export const useScoket = () => {
@@ -6,7 +8,8 @@ export const useScoket = () => {
   const playerInfo = ref<Info | null>(null);
   const timer = ref<NodeJS.Timer | null>(null);
   const user = ref<UserProp | null>(null);
-  const game = useGameStore();
+  const imStore = useIMStore();
+  const { info } = storeToRefs(imStore);
 
   const heartBeat = () => {
     timer.value = setInterval(() => {
@@ -97,6 +100,7 @@ export const useScoket = () => {
   const setInfo = (data: MessageData<"info">) => {
     const { content } = data;
     playerInfo.value = content;
+    imStore.setInfo(content);
   };
 
   const getInfo = () => {
@@ -121,19 +125,16 @@ export const useScoket = () => {
   };
 
   const sendMessage = (text: string) => {
-    // send({ type: "message", content: text });
-  };
-
-  const getMessge = () => {
-    // send({ type: "getMessage" });
-  };
-
-  const selectCharacter = (data: Game.CharacterProp) => {
-    // send({ type: "character", content: { character: data } });
-  };
-
-  const useCard = (data: { card: Game.CardProp; to: string }) => {
-    // send({ type: "card", content: data });
+    if (info.value) {
+      send<"message">({
+        type: "message",
+        content: {
+          timestamp: Date.now(),
+          messageFrom: info.value.player,
+          message: text
+        }
+      });
+    }
   };
 
   return {
@@ -143,11 +144,8 @@ export const useScoket = () => {
     disConnect,
     enterRoom,
     createRoom,
-    getMessge,
     ready,
     start,
     sendMessage,
-    selectCharacter,
-    useCard
   };
 };

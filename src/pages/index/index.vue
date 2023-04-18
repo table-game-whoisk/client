@@ -87,7 +87,6 @@ onMounted(() => {
 });
 
 watch(playerInfo, () => {
-  console.log(playerInfo.value?.room)
   if (playerInfo.value?.room?.status === "playing") {
     uni.redirectTo({
       url: "/pages/room/index"

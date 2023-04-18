@@ -30,16 +30,17 @@
 </template>
 
 <script lang="ts" setup>
-import { useGameStore } from "@/store/game";
-import { useScoket } from "@/utils/useSocket";
+import { useIMStore } from "@/store/im";
 import { storeToRefs } from "pinia";
 import { watch, ref, computed, type VNodeRef } from "vue";
 const text = ref<string>("");
 const bottomId = ref<string>("bottom");
 
 const emit = defineEmits(["send"]);
-const game = useGameStore();
-const { messageList } = storeToRefs(game);
+const imStore = useIMStore();
+const { info } = storeToRefs(imStore);
+
+const messageList = computed(() => info.value?.room?.messageList || []);
 
 const onSend = () => {
   emit("send", text.value);

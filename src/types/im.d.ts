@@ -1,4 +1,4 @@
-declare type messageType = "error" | "info" | "createRoom" | "joinRoom" | "ready" | "start";
+declare type messageType = "error" | "info" | "createRoom" | "joinRoom" | "ready" | "start" | "message";
 // create = "create",
 // enter = "enter",
 // exit = "exit",
@@ -10,7 +10,6 @@ declare type messageType = "error" | "info" | "createRoom" | "joinRoom" | "ready
 // card = "card",
 // drop = "drop",
 // skill = "skill",
-// message = "message",
 // getMessage = "getMessage",
 // error = "error"
 
@@ -28,12 +27,13 @@ declare interface SendData<T extends messageType> {
     ? { id: string; number?: number }
     : T extends "start"
     ? { id: string }
+    : T extends "message"
+    ? Message
     : string;
 }
 
 declare interface Message {
   timestamp: number;
-  messageFrom: Info;
-  to?: userId | userId[] | undefined;
+  messageFrom: PlayerInfo;
   message: string;
 }

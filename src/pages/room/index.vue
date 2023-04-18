@@ -8,7 +8,7 @@
         class="member"
         @click="() => showPooup(player)"
       >
-        <image :src="player.avatarUrl" class="img">
+        <image :src="player.avatar" class="img">
           <!-- <view class="cover" v-if="player.status !== 'ready'">
             <uni-icons type="more-filled" size="30" color="#999" />
           </view> -->
@@ -20,16 +20,16 @@
       <view class="topInfo">
         <view class="left">
           <view class="nickname">{{ info?.player?.nickname }}dwedwedaefaf</view>
-          <view>({{ playerInfo?.character?.name }})</view>
+          <view>("慈悲的神父")</view>
         </view>
         <view class="right">
-          <view>❤:{{ playerInfo?.character?.health }}</view>
-          <view>🔪:{{ playerInfo?.character?.attack }}</view>
-          <view>🛡:{{ playerInfo?.character?.defense }}</view>
-          <view>✨:{{ playerInfo?.character?.dodge }}</view>
+          <view>❤:{{ 1 }}</view>
+          <view>🔪:{{ 1 }}</view>
+          <view>🛡:{{ 1 }}</view>
+          <view>✨:{{ 1 }}</view>
         </view>
       </view>
-      <view class="bottomInfo"> [skillname] {{ playerInfo?.character?.Skill?.name }} </view>
+      <view class="bottomInfo"> [skillname] "技能名称" </view>
     </view>
     <view class="bottomField">
       <Chat @send="sendMessage" />
@@ -37,8 +37,8 @@
   </view>
   <uni-popup ref="popup" background-color="#fff" type="bottom">
     <view class="popContent">
-      <CharacterList v-if="gameStep === 'character'" @select="selectCharacter" />
-      <PlayerPanel v-else :playerInfo="player" @card="useCard" />
+      <!-- <CharacterList v-if="gameStep === 'character'" @select="selectCharacter" />
+      <PlayerPanel v-else :playerInfo="player" @card="useCard" /> -->
     </view>
   </uni-popup>
 </template>
@@ -51,16 +51,18 @@ import CharacterList from "@/components/CharacterList/CharacterList.vue";
 import PlayerPanel from "@/components/PlayerPanel/PlayerPanel.vue";
 import { useGameStore } from "@/store/game";
 import { storeToRefs } from "pinia";
+import { useIMStore } from "@/store/im";
 
-const { info, getInfo, sendMessage, getMessge, selectCharacter, useCard } = useScoket();
-const popup = ref<any>(null);
+const { getInfo, sendMessage } = useScoket();
+const imStore = useIMStore();
+const { info } = storeToRefs(imStore);
 const game = useGameStore();
 const { gameStep, playerInfo } = storeToRefs(game);
+const popup = ref<any>(null);
 const player = ref<PlayerInfo | null>(null);
 
 onMounted(() => {
   getInfo();
-  getMessge();
 });
 
 watch(gameStep, () => {
