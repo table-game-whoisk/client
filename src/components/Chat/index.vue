@@ -9,7 +9,7 @@
         scroll-with-animation="true"
       >
         <view
-          v-for="(item, index) in messageList"
+          v-for="item in messageList"
           :key="item.timestamp"
           :class="item.messageFrom.id === '0' ? 'message orange' : 'message green'"
         >
@@ -23,7 +23,7 @@
       </scroll-view>
     </view>
     <view class="bottom">
-      <input type="text" class="input" v-model="text" />
+      <input type="text" class="input" v-model="text" @confirm="onSend" />
       <uni-icons type="paperplane-filled" size="30" class="icon" @click="onSend"></uni-icons>
     </view>
   </view>
@@ -40,7 +40,7 @@ const emit = defineEmits(["send"]);
 const imStore = useIMStore();
 const { info } = storeToRefs(imStore);
 
-const messageList = computed(() => info.value?.room?.messageList || []);
+const messageList = computed(() => info.value?.room?.messages || []);
 
 const onSend = () => {
   emit("send", text.value);
@@ -65,11 +65,12 @@ watch(messageList, () => {
   box-sizing: border-box;
   .messageField {
     flex: 1;
+    max-height: 56vh;
     border-bottom: none;
     box-sizing: border-box;
     padding: 10px 0;
     .inner {
-      max-height: 45vh;
+      max-height: 100%;
       box-sizing: border-box;
       overflow-y: scroll;
       display: flex;
@@ -115,9 +116,11 @@ watch(messageList, () => {
     align-items: center;
     box-shadow: 1px 1px 3px 3px #ddd;
     border-radius: 5px;
-    padding: 5px 10px;
+    padding: 5px 0;
+    height: 40px;
     .input {
       flex: 1;
+      margin: 0 10px;
     }
     .icon {
       height: 30px;

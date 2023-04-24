@@ -1,15 +1,13 @@
-import { useGameStore } from "@/store/game";
 import { useIMStore } from "@/store/im";
 import { storeToRefs } from "pinia";
 import { ref, watch } from "vue";
 
 export const useScoket = () => {
   const socket = ref<UniApp.SocketTask | null>(null);
-  const playerInfo = ref<Info | null>(null);
+  const info = ref<Info | null>(null);
   const timer = ref<NodeJS.Timer | null>(null);
   const user = ref<UserProp | null>(null);
   const imStore = useIMStore();
-  const { info } = storeToRefs(imStore);
 
   const heartBeat = () => {
     timer.value = setInterval(() => {
@@ -47,7 +45,7 @@ export const useScoket = () => {
     uni.closeSocket({ success() {}, fail() {} });
   };
 
-  const send = <T extends messageType>(data: SendData<T>) => {
+  const send = <T extends SendType>(data: SendData<T>) => {
     uni.sendSocketMessage({
       data: JSON.stringify(data),
       success() {
@@ -59,23 +57,13 @@ export const useScoket = () => {
     });
   };
 
-  const dispatchMessage = <T extends messageType>(data: MessageData<T>) => {
+  const dispatchMessage = <T extends ReceiveType>(data: ReceiveData<T>) => {
     switch (data.type) {
       case "info":
-        setInfo(data as MessageData<"info">);
+        setInfo(data as ReceiveData<"info">);
         break;
-      // case "message":
-      //   game.setMessageList(messages || []);
-      //   break;
-      // case "character":
-      //   game.setCharacter(content.characterList);
-      //   break;
-      // case "round":
-      //   game.setGameStep("round");
-      //   content && game.setCurrRoundPlayer(content);
-      //   break;
       case "error":
-        const { content } = data as MessageData<"error">;
+        const { content } = data as ReceiveData<"error">;
         uni.showToast({
           title: content,
           icon: "error"
@@ -87,7 +75,7 @@ export const useScoket = () => {
 
   uni.onSocketMessage(function (res) {
     if (res.data === "pong") return;
-    const data = JSON.parse(res.data) as MessageData<messageType>;
+    const data = JSON.parse(res.data) as ReceiveData<ReceiveType>;
     dispatchMessage(data);
   });
 
@@ -97,48 +85,45 @@ export const useScoket = () => {
     timer.value = null;
   });
 
-  const setInfo = (data: MessageData<"info">) => {
+  const setInfo = (data: ReceiveData<"info">) => {
     const { content } = data;
-    playerInfo.value = content;
+    info.value = content;
     imStore.setInfo(content);
   };
 
   const getInfo = () => {
-    send({ type: "info" });
+    send<"info">({ type: "info", content: null });
   };
 
-  const createRoom = (id: string, number: number) => {
-    send<"createRoom">({ type: "createRoom", content: { id, number } });
+  const createRoom = (id: string, memberCount: number) => {
+    send<"create">({ type: "create", content: { id, memberCount } });
   };
 
   const enterRoom = (id: string) => {
-    send<"joinRoom">({ type: "joinRoom", content: { id } });
+    send<"join">({ type: "join", content: id });
   };
 
   const ready = () => {
-    send<"ready">({ type: "ready" });
+    send<"ready">({
+      type: "ready",
+      content: null
+    });
   };
 
   const start = () => {
-    if (!playerInfo.value?.room?.id) return;
-    send<"start">({ type: "start", content: { id: playerInfo.value.room.id } });
+    if (!info.value?.room?.id) return;
+    send<"start">({ type: "start", content: info.value?.room?.id });
   };
 
   const sendMessage = (text: string) => {
-    if (info.value) {
-      send<"message">({
-        type: "message",
-        content: {
-          timestamp: Date.now(),
-          messageFrom: info.value.player,
-          message: text
-        }
-      });
-    }
+    send<"message">({
+      type: "message",
+      content: text
+    });
   };
 
   return {
-    playerInfo,
+    info,
     getInfo,
     connect,
     disConnect,
@@ -146,6 +131,6 @@ export const useScoket = () => {
     createRoom,
     ready,
     start,
-    sendMessage,
+    sendMessage
   };
 };

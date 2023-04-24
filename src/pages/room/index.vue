@@ -1,44 +1,26 @@
 <template>
   <view class="content">
-    <view class="title"> 房间id:{{ info?.room?.id }} </view>
+    <view class="title">
+      <text>房间id:{{ info?.room?.id }}</text>
+      <text class="keyWordBtn orange" @click="() => showKeyWord(true)">我的关键词</text>
+      <text class="keyWordBtn green" @click="() => showKeyWord()">卧底关键词</text>
+    </view>
     <view class="membersBlock">
-      <view
-        v-for="(player, index) in info?.room?.members"
-        :key="player.id"
-        class="member"
-        @click="() => showPooup(player)"
-      >
-        <image :src="player.avatar" class="img">
-          <!-- <view class="cover" v-if="player.status !== 'ready'">
-            <uni-icons type="more-filled" size="30" color="#999" />
-          </view> -->
-        </image>
+      <view v-for="(player, index) in info?.room?.members" :key="player.id" class="member">
+        <image :src="player.avatar" class="img"> </image>
         <view class="nick">{{ player.nickname }}</view>
       </view>
     </view>
-    <view class="playerPannel" @click="() => playerInfo && showPooup(playerInfo)">
-      <view class="topInfo">
-        <view class="left">
-          <view class="nickname">{{ info?.player?.nickname }}dwedwedaefaf</view>
-          <view>("慈悲的神父")</view>
-        </view>
-        <view class="right">
-          <view>❤:{{ 1 }}</view>
-          <view>🔪:{{ 1 }}</view>
-          <view>🛡:{{ 1 }}</view>
-          <view>✨:{{ 1 }}</view>
-        </view>
-      </view>
-      <view class="bottomInfo"> [skillname] "技能名称" </view>
-    </view>
     <view class="bottomField">
       <Chat @send="sendMessage" />
+      <!-- <NoticePannel /> -->
     </view>
   </view>
-  <uni-popup ref="popup" background-color="#fff" type="bottom">
-    <view class="popContent">
-      <!-- <CharacterList v-if="gameStep === 'character'" @select="selectCharacter" />
-      <PlayerPanel v-else :playerInfo="player" @card="useCard" /> -->
+  <uni-popup ref="popup" type="center">
+    <view class="popup-content">
+      <text class="header">{{ isSelf ? "我的关键词" : "卧底关键词" }}</text>
+      <text class="keyWord">巴拉巴拉巴拉零八零八</text>
+      <text class="keyWord">巴拉巴拉巴拉零八零八</text>
     </view>
   </uni-popup>
 </template>
@@ -46,35 +28,20 @@
 <script lang="ts" setup>
 import { useScoket } from "@/utils/useSocket";
 import Chat from "@/components/Chat/index.vue";
-import { onMounted, ref, watch } from "vue";
-import CharacterList from "@/components/CharacterList/CharacterList.vue";
-import PlayerPanel from "@/components/PlayerPanel/PlayerPanel.vue";
-import { useGameStore } from "@/store/game";
+import NoticePannel from "@/components/NoticePannel/NoticePannel.vue";
+import { ref } from "vue";
 import { storeToRefs } from "pinia";
 import { useIMStore } from "@/store/im";
 
-const { getInfo, sendMessage } = useScoket();
+const { sendMessage } = useScoket();
 const imStore = useIMStore();
 const { info } = storeToRefs(imStore);
-const game = useGameStore();
-const { gameStep, playerInfo } = storeToRefs(game);
 const popup = ref<any>(null);
-const player = ref<PlayerInfo | null>(null);
+const isSelf = ref<boolean>(false);
 
-onMounted(() => {
-  getInfo();
-});
-
-watch(gameStep, () => {
-  if (gameStep.value === "character") {
-    popup.value?.open();
-  } else if (gameStep.value === "round") {
-  }
-});
-
-const showPooup = (data: PlayerInfo) => {
-  player.value = data;
+const showKeyWord = (self?: boolean) => {
   popup.value?.open();
+  isSelf.value = !!self;
 };
 </script>
 
@@ -88,6 +55,21 @@ const showPooup = (data: PlayerInfo) => {
   .title {
     color: #888;
     box-sizing: border-box;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    .keyWordBtn {
+      color: #fff;
+      padding: 5px;
+      margin-left: 5px;
+      border-radius: 4px;
+    }
+    .orange {
+      background-color: #fc7300;
+    }
+    .green {
+      background-color: #1f8a70;
+    }
   }
   .membersBlock {
     display: grid;
@@ -96,6 +78,7 @@ const showPooup = (data: PlayerInfo) => {
     grid-template-rows: repeat(2, 50%);
     align-content: center;
     justify-content: center;
+    height: 42vw;
     .member {
       box-sizing: content-box;
       border-radius: 5px;
@@ -129,50 +112,31 @@ const showPooup = (data: PlayerInfo) => {
       }
     }
   }
-  .playerPannel {
-    height: 10vh;
-    box-shadow: 1px 1px 3px 3px #ddd;
-    border-radius: 5px;
-    padding: 10px;
-    box-sizing: border-box;
-
-    .topInfo {
-      font-size: 0.8em;
-      display: flex;
-      justify-content: space-between;
-      .left {
-        display: flex;
-        .nickname {
-          width: 10vw;
-          text-overflow: ellipsis;
-          overflow: hidden;
-          white-space: nowrap;
-        }
-      }
-      .right {
-        display: flex;
-        width: 30vw;
-        justify-content: space-between;
-        font-size: 0.8em;
-      }
-    }
-    .bottomInfo {
-      margin-top: 5px;
-      font-size: 0.8em;
-      box-sizing: border-box;
-      width: 100%;
-      text-overflow: ellipsis;
-      overflow: hidden;
-      white-space: nowrap;
-    }
-  }
   .bottomField {
     flex: 1;
     box-sizing: border-box;
   }
 }
-.popContent {
-  max-height: 70vh;
+.popup-content {
+  width: 80vw;
+  border-radius: 10px;
+  background-color: #fff;
   padding: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  .header {
+    font-size: 2rem;
+    margin-bottom: 10px;
+  }
+  .keyWord {
+    color: #fff;
+    padding: 10px;
+    border-radius: 4px;
+    font-size: 1.2rem;
+    margin-bottom: 10px;
+    background-color: #fc7300;
+  }
 }
 </style>

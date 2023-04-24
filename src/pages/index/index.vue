@@ -1,9 +1,9 @@
 <template>
-  <view class="content" v-if="playerInfo?.room">
-    <view class="topBox"> 房间号： {{ playerInfo.room.id }} </view>
+  <view class="content" v-if="info?.room">
+    <view class="topBox"> 房间号： {{ info.room.id }} </view>
     <view class="topBox"> 当前已准备： {{ readyCount }} </view>
     <view class="membersBlock">
-      <view v-for="(player, index) in playerInfo?.room.members" :key="player.id" class="member">
+      <view v-for="(player, index) in info?.room.members" :key="player.id" class="member">
         <image :src="player.avatar" class="img">
           <view class="cover" v-if="player.status !== 'ready'">
             <uni-icons type="more-filled" size="30" color="#999"></uni-icons> </view
@@ -15,7 +15,7 @@
       <button :class="isReady ? 'btn gray' : 'btn orange'" @click="ready" :disabled="isReady">
         {{ isReady ? "已准备" : "准备" }}
       </button>
-      <button v-if="playerInfo.player?.id === playerInfo.room.owner" class="btn green" @click="start">开始</button>
+      <button v-if="info?.id === info.room.owner" class="btn green" @click="start">开始</button>
     </view>
   </view>
   <view class="content" v-else>
@@ -48,7 +48,7 @@
     </view>
   </uni-popup>
   <uni-popup ref="createDialog" type="dialog">
-    <uni-popup-dialog type="info" title="设置房间人数" @confirm="handleCreateRoom">
+    <uni-popup-dialog type="info" title="设置房间" @confirm="handleCreateRoom">
       <uni-number-box :min="4" :max="10" :step="1" v-model="memberNumber" />
     </uni-popup-dialog>
   </uni-popup>
@@ -80,17 +80,22 @@ const avatar = ref<string>(
 );
 const memberNumber = ref<number>(4);
 
-const { playerInfo, connect, createRoom, enterRoom, ready, start } = useScoket();
+const { info, connect, createRoom, enterRoom, ready, start } = useScoket();
 
 onMounted(() => {
   handleConnect();
 });
 
-watch(playerInfo, () => {
-  if (playerInfo.value?.room?.status === "playing") {
-    uni.redirectTo({
-      url: "/pages/room/index"
-    });
+watch(info, () => {
+  // if (info.value?.room?.status && info.value?.room?.status === "addKey") {
+  //   uni.redirectTo({
+  //     url: "/pages/room/index"
+  //   });
+  // }
+  if (info.value?.room) {
+      uni.redirectTo({
+        url: "/pages/room/index"
+      });
   }
 });
 
@@ -143,12 +148,12 @@ const handleJoinRoom = (roomId: string) => {
 
 const readyCount = computed(
   () =>
-    `${playerInfo.value?.room?.members?.filter(({ status }) => status === "ready").length || 0}/${
-      playerInfo.value?.room?.members?.length || 0
+    `${info.value?.room?.members?.filter(({ status }) => status === "ready").length || 0}/${
+      info.value?.room?.members?.length || 0
     }`
 );
 
-const isReady = computed(() => playerInfo.value?.player?.status === "ready");
+const isReady = computed(() => info.value?.status === "ready");
 </script>
 
 <style lang="scss" scoped>
