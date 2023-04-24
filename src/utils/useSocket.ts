@@ -122,6 +122,10 @@ export const useScoket = () => {
     });
   };
 
+  const sendKey = (text: string) => {
+    send<"key">({ type: "key", content: text });
+  };
+
   return {
     info,
     getInfo,
@@ -131,6 +135,7 @@ export const useScoket = () => {
     createRoom,
     ready,
     start,
-    sendMessage
+    sendMessage,
+    sendKey
   };
 };

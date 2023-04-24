@@ -12,8 +12,8 @@
       </view>
     </view>
     <view class="bottomField">
-      <Chat @send="sendMessage" />
-      <!-- <NoticePannel /> -->
+      <NoticePannel v-if="info?.room?.status === 'addKey' || info?.room?.status === 'vote'" @send="sendKey" />
+      <Chat @send="sendMessage" v-else />
     </view>
   </view>
   <uni-popup ref="popup" type="center">
@@ -33,7 +33,7 @@ import { ref } from "vue";
 import { storeToRefs } from "pinia";
 import { useIMStore } from "@/store/im";
 
-const { sendMessage } = useScoket();
+const { sendMessage, sendKey } = useScoket();
 const imStore = useIMStore();
 const { info } = storeToRefs(imStore);
 const popup = ref<any>(null);

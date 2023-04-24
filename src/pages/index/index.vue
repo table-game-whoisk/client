@@ -87,15 +87,10 @@ onMounted(() => {
 });
 
 watch(info, () => {
-  // if (info.value?.room?.status && info.value?.room?.status === "addKey") {
-  //   uni.redirectTo({
-  //     url: "/pages/room/index"
-  //   });
-  // }
-  if (info.value?.room) {
-      uni.redirectTo({
-        url: "/pages/room/index"
-      });
+  if (info.value?.room?.status && info.value?.room?.status === "addKey") {
+    uni.redirectTo({
+      url: "/pages/room/index"
+    });
   }
 });
 
