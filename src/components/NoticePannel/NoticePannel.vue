@@ -13,8 +13,8 @@
     <view class="textframe">
       <text>点击你认为是卧底玩家的头像进行投票</text>
     </view>
-    <button class="btn green">再想想</button>
-    <button class="btn orange">就是他</button>
+    <button class="btn green" @click="() => emit('cancleSelect')">再想想</button>
+    <button class="btn orange" @click="() => emit('vote')">就是他</button>
   </view>
 </template>
 
@@ -27,7 +27,7 @@ import { ref } from "vue";
 const imStore = useIMStore();
 const { info } = storeToRefs(imStore);
 const keyWord = ref<string>("");
-const emit = defineEmits(["send", "vote"]);
+const emit = defineEmits(["send", "vote", "cancleSelect"]);
 
 const handleSubmitKey = () => {
   if (!keyWord.value) return;
@@ -40,7 +40,6 @@ const handleSubmitKey = () => {
   }
   emit("send", keyWord.value);
 };
-
 </script>
 
 <style lang="scss" scoped>

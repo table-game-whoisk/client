@@ -23,7 +23,7 @@
       </scroll-view>
     </view>
     <view class="bottom">
-      <input type="text" class="input" v-model="text" @confirm="onSend" />
+      <input type="text" class="input" v-model="text" @confirm="onSend" :disabled="info?.status === 'mute'" />
       <uni-icons type="paperplane-filled" size="30" class="icon" @click="onSend"></uni-icons>
     </view>
   </view>
@@ -43,15 +43,17 @@ const { info } = storeToRefs(imStore);
 const messageList = computed(() => info.value?.room?.messages || []);
 
 const onSend = () => {
+  if (info.value?.status === "mute") return;
   emit("send", text.value);
   text.value = "";
 };
 
 const goBottom = () => {
-  bottomId.value = bottomId.value + messageList.value.length;
+  bottomId.value = "bottom" + messageList.value.length;
+  console.log(bottomId.value)
 };
 
-watch(messageList, () => {
+watch(info, () => {
   goBottom();
 });
 </script>
@@ -65,12 +67,11 @@ watch(messageList, () => {
   box-sizing: border-box;
   .messageField {
     flex: 1;
-    max-height: 56vh;
     border-bottom: none;
     box-sizing: border-box;
     padding: 10px 0;
     .inner {
-      max-height: 100%;
+      max-height: 52vh;
       box-sizing: border-box;
       overflow-y: scroll;
       display: flex;

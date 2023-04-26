@@ -51,10 +51,12 @@ declare type RoomStatus = "end" | "addKey" | "round" | "vote";
 
 declare interface Info {
   id: string;
-  status: string;
-  avatar: string;
   nickname: string;
+  avatar: string;
+  status: PlayerStatus;
   room: RoomInfo | null;
+  key: string | null;
+  role: "undercover" | "civilian";
 }
 
 declare interface PlayerInfo {
@@ -62,6 +64,7 @@ declare interface PlayerInfo {
   nickname: string;
   avatar: string;
   status: PlayerStatus;
+  voteCount: number;
 }
 
 declare interface RoomInfo {
@@ -73,4 +76,5 @@ declare interface RoomInfo {
   memberCount: memberCount;
   currentPlayer: PlayerInfo | null;
   subject?: string;
+  undercoverKey: string[];
 }

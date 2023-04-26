@@ -1,7 +1,10 @@
 <template>
   <view class="content" v-if="info?.room">
-    <view class="topBox"> 房间号： {{ info.room.id }} </view>
-    <view class="topBox"> 当前已准备： {{ readyCount }} </view>
+    <view class="title">
+      <text>房间号：</text><text>{{ info.room.id }}</text>
+      <text class="btn" v-if="info?.id === info.room.owner" @click="() => disslovePoup?.open()">解散房间</text>
+    </view>
+    <view class="title"> 当前已准备： {{ readyCount }} </view>
     <view class="membersBlock">
       <view v-for="(player, index) in info?.room.members" :key="player.id" class="member">
         <image :src="player.avatar" class="img">
@@ -60,6 +63,9 @@
       placeholder="请输入房间号"
       @confirm="handleJoinRoom"
   /></uni-popup>
+  <uni-popup ref="disslovePoup" type="dialog">
+    <uni-popup-dialog type="info" title="提示" content="确定解散房间？" @confirm="handleDisslove" />
+  </uni-popup>
 </template>
 
 <script setup lang="ts">
@@ -68,31 +74,44 @@ import { createId } from "@/utils/createId";
 import { useScoket } from "@/utils/useSocket";
 import { useUserStore } from "@/store/user";
 import { storeToRefs, type Store, type _UnwrapAll } from "pinia";
+import { useIMStore } from "@/store/im";
 
 const inputDialog = ref<any>(null);
 const createDialog = ref<any>(null);
 const popup = ref<any>(null);
+const disslovePoup = ref<any>(null);
 const userStore = useUserStore();
+const imStore = useIMStore();
 const { user } = storeToRefs(userStore);
+const { info } = storeToRefs(imStore);
 const nickname = ref<string>("");
 const avatar = ref<string>(
   "https://mmbiz.qpic.cn/mmbiz/icTdbqWNOwNRna42FI242Lcia07jQodd2FJGIYQfG0LAJGFxM4FbnQP6yfMxBgJ0F3YRqJCJ1aPAK2dQagdusBZg/0"
 );
 const memberNumber = ref<number>(4);
 
-const { info, connect, createRoom, enterRoom, ready, start } = useScoket();
+const { connect, createRoom, enterRoom, ready, start, sendDisslove } = useScoket();
 
 onMounted(() => {
   handleConnect();
 });
 
 watch(info, () => {
-  if (info.value?.room?.status && info.value?.room?.status === "addKey") {
+  if (info.value?.room?.status && info.value?.room?.status !== "end") {
     uni.redirectTo({
       url: "/pages/room/index"
     });
   }
 });
+
+const readyCount = computed(
+  () =>
+    `${info.value?.room?.members?.filter(({ status }) => status === "ready").length || 0}/${
+      info.value?.room?.memberCount || 4
+    }`
+);
+
+const isReady = computed(() => info.value?.status === "ready");
 
 //  查找用户或创建用户 && 链接用户，
 const handleConnect = async () => {
@@ -100,7 +119,7 @@ const handleConnect = async () => {
     if (!user.value.id) {
       popup.value && popup.value.open();
     } else {
-      connect({ ...user.value });
+      !info.value?.room && connect({ ...user.value });
     }
   } catch (e) {}
 };
@@ -141,14 +160,9 @@ const handleJoinRoom = (roomId: string) => {
   enterRoom(roomId);
 };
 
-const readyCount = computed(
-  () =>
-    `${info.value?.room?.members?.filter(({ status }) => status === "ready").length || 0}/${
-      info.value?.room?.members?.length || 0
-    }`
-);
-
-const isReady = computed(() => info.value?.status === "ready");
+const handleDisslove = () => {
+  info.value?.room && sendDisslove(info.value.room.owner);
+};
 </script>
 
 <style lang="scss" scoped>
@@ -156,6 +170,17 @@ const isReady = computed(() => info.value?.status === "ready");
   height: 100vh;
   display: flex;
   flex-direction: column;
+  .title {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px 0;
+    .btn {
+      margin-left: 10px;
+      color: brown;
+      text-decoration: underline;
+    }
+  }
   .topBox {
     padding: 20px 0;
     display: flex;

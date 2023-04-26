@@ -124,6 +124,24 @@ export const useScoket = () => {
 
   const sendKey = (text: string) => {
     send<"key">({ type: "key", content: text });
+    uni.showToast({
+      title: "添加成功",
+      icon: "success",
+      duration: 2000
+    });
+  };
+
+  const sendDisslove = (id: RoomId) => {
+    send<"disslove">({ type: "disslove", content: id });
+  };
+
+  const senVote = (id: PlayerId) => {
+    send<"vote">({ type: "vote", content: id });
+    uni.showToast({
+      title: "投票成功",
+      icon: "success",
+      duration: 2000
+    });
   };
 
   return {
@@ -136,6 +154,8 @@ export const useScoket = () => {
     ready,
     start,
     sendMessage,
-    sendKey
+    sendKey,
+    sendDisslove,
+    senVote
   };
 };

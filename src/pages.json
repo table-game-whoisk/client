@@ -8,12 +8,6 @@
       }
     },
     {
-      "path": "pages/ready/index",
-      "style": {
-        "navigationBarTitleText": "ready"
-      }
-    },
-    {
       "path": "pages/room/index",
       "style": {
         "navigationBarTitleText": "room"
