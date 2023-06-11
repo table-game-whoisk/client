@@ -13,6 +13,8 @@ export const request = (() => {
     } else {
       if (path.startsWith("/")) {
         return baseURL + path;
+      } else if (path.startsWith("http")) {
+        return path;
       } else {
         return baseURL + "/" + path;
       }

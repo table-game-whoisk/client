@@ -27,7 +27,7 @@ export const useScoket = () => {
     const { id, nickname, avatar } = data;
     user.value = data;
     socket.value = uni.connectSocket({
-      url: `${import.meta.env.VITE_SOCKET_PORT}?id=${id}&nickname=${nickname}&avatar=${avatar}`,
+      url: `${import.meta.env.VITE_SOCKET_PORT}/?id=${id}&nickname=${nickname}&avatar=${avatar}`,
       success() {
         console.log("connect success");
         heartBeat();

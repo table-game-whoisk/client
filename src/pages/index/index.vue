@@ -37,7 +37,7 @@
   </view>
   <uni-popup ref="popup" background-color="#fff" type="top">
     <view class="popup-content">
-      <button open-type="chooseAvatar" @chooseavatar="(e:any)=>avatar = e.detail.avatarUrl" class="avatar-wrap">
+      <button open-type="chooseAvatar" @chooseavatar="chooseAvatar" class="avatar-wrap">
         <image class="avatar" :src="avatar"></image>
       </button>
       <input
@@ -75,6 +75,8 @@ import { useScoket } from "@/utils/useSocket";
 import { useUserStore } from "@/store/user";
 import { storeToRefs, type Store, type _UnwrapAll } from "pinia";
 import { useIMStore } from "@/store/im";
+import { request } from "@/utils/request";
+import { json } from "stream/consumers";
 
 const inputDialog = ref<any>(null);
 const createDialog = ref<any>(null);
@@ -114,6 +116,26 @@ const readyCount = computed(
 const isReady = computed(() => info.value?.status === "ready");
 
 //  查找用户或创建用户 && 链接用户，
+const chooseAvatar = (e: any) => {
+  uni.uploadFile({
+    url: "http://123.57.187.233/api/room/upload",
+    filePath: e.detail.avatarUrl,
+    header: {
+      "Content-Type": "form-data"
+    },
+    name: "img",
+    success(res) {
+      try {
+        const data = JSON.parse(res.data);
+        avatar.value = data.url;
+      } catch (e) {}
+    },
+    fail(err) {
+      console.log(err);
+    }
+  });
+};
+
 const handleConnect = async () => {
   try {
     if (!user.value.id) {
