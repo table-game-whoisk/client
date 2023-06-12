@@ -47,7 +47,7 @@
         @change="(e:any)=>nickname = e.detail.value"
         class="input"
       />
-      <button @click="handleCreateUser" class="btn">确定</button>
+      <button @click="handleCreateUser" :disabled="loading" class="btn">确定</button>
     </view>
   </uni-popup>
   <uni-popup ref="createDialog" type="dialog">
@@ -93,6 +93,7 @@ const avatar = ref<string>(
 const memberNumber = ref<number>(4);
 
 const { connect, createRoom, enterRoom, ready, start, sendDisslove } = useScoket();
+const loading = ref(false);
 
 onMounted(() => {
   handleConnect();
@@ -117,8 +118,9 @@ const isReady = computed(() => info.value?.status === "ready");
 
 //  查找用户或创建用户 && 链接用户，
 const chooseAvatar = (e: any) => {
+  loading.value = true;
   uni.uploadFile({
-    url: "http://123.57.187.233/api/room/upload",
+    url: `${import.meta.env.VITE_API_BASEURL}/room/upload`,
     filePath: e.detail.avatarUrl,
     header: {
       "Content-Type": "form-data"
@@ -132,6 +134,9 @@ const chooseAvatar = (e: any) => {
     },
     fail(err) {
       console.log(err);
+    },
+    complete() {
+      loading.value = false;
     }
   });
 };
@@ -154,7 +159,8 @@ const handleCreateUser = async () => {
     nickname: nickname.value,
     avatar: avatar.value
   };
-  userStore.createUser(data);
+  const user = await userStore.createUser(data);
+  connect(user);
   popup.value && popup.value.close();
 };
 

@@ -8,6 +8,7 @@ export const useUserStore = defineStore("user", () => {
   const createUser = async (data: { nickname: string; avatar: string }) => {
     const res = (await request({ url: apis.user.create, method: "POST", data })) as UserProp;
     res && setUserInfo(res);
+    return res;
   };
 
   const setUserInfo = (data: { id?: string; nickname?: string; avatar?: string }) => {
